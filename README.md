@@ -15,7 +15,7 @@ Reemplazar en los scripts las referencias a:
 * <code>/backup</code>: un directorio donde se alojan los backups, probablemente un servidor de almacenamiento montado en un directorio local
 * <code>DATE</code>: una variable que declaro para tener referencia de la fecha y usarla en los nombres de los archivos (no es necesario cambiarla)
 
-Correr por primera vez el script full-backup.sh a mano para inicializar los archivos incrementales y el snapshot.
+Correr por primera vez el script [full-backup.sh](https://github.com/CGastrell/incremental-tar-backup/blob/master/full-back-up.sh) a mano para inicializar los archivos incrementales y el snapshot.
 
 
 Uso típico
@@ -53,7 +53,7 @@ Y para que el incremental se corra todos los días a las 4AM:
 0 4 * * * /path/to/incremental-backup.sh
 </pre>
 
-Es importante que corras la primera vez el full-backup.sh a mano (no esperes que lo haga el cron).
+Es importante que corras la primera vez el [full-backup.sh](https://github.com/CGastrell/incremental-tar-backup/blob/master/full-back-up.sh) a mano (no esperes que lo haga el cron).
 
 
 Incremental simple vs incremental por niveles
