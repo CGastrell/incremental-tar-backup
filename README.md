@@ -59,7 +59,7 @@ Es importante que corras la primera vez el [full-backup.sh](https://github.com/C
 Incremental simple vs incremental por niveles
 =============================================
 
-El incremental del [tar](https://en.wikipedia.org/wiki/Tar_(computing)) se puede usar de 2 maneras:
+El incremental del [tar](http://kb.iu.edu/data/acfi.html) se puede usar de 2 maneras:
 
 * Creando incrementales directos sobre un full back up (simple)
 * Creando niveles de incrementales (menos simple)
