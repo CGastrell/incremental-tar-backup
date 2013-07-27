@@ -20,7 +20,7 @@ rm /path/to/workspace/*snar
 # && hago el tar.gz con listed-incremental a un DIR.snar, el nombre
 #    del archivo tar lo hago con la fecha
 # && muevo el archivo al directorio de recoleccion/almacenamiento
-cd /path/to/dir/DIR && tar --listed-incremental /opt/backups/DIR.snar -czpf /path/to/workspace/DIR-$DATE-full.tar.gz DIR && mv /path/to/workspace/DIR-$DATE-full.tar.gz /backup
+cd /path/to/dir && tar --listed-incremental /opt/backups/DIR.snar -czpf /path/to/workspace/DIR-$DATE-full.tar.gz DIR && mv /path/to/workspace/DIR-$DATE-full.tar.gz /backup
 
 #Paso 3
 #Con --listed-incremental se crea el archivo DIR.snar, 
