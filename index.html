@@ -1,0 +1,130 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <title>Incremental Tar Backup by CGastrell</title>
+
+    <link rel="stylesheet" href="stylesheets/styles.css">
+    <link rel="stylesheet" href="stylesheets/pygment_trac.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+  </head>
+  <body>
+    <div class="wrapper">
+      <header>
+        <h1>Incremental Tar Backup</h1>
+        <p>Bash script para backups incrementales</p>
+
+        <p class="view"><a href="https://github.com/CGastrell/incremental-tar-backup">View the Project on GitHub <small>CGastrell/incremental-tar-backup</small></a></p>
+
+
+        <ul>
+          <li><a href="https://github.com/CGastrell/incremental-tar-backup/zipball/master">Download <strong>ZIP File</strong></a></li>
+          <li><a href="https://github.com/CGastrell/incremental-tar-backup/tarball/master">Download <strong>TAR Ball</strong></a></li>
+          <li><a href="https://github.com/CGastrell/incremental-tar-backup">View On <strong>GitHub</strong></a></li>
+        </ul>
+      </header>
+      <section>
+        <blockquote>
+<p>Bash script para backups incrementales</p>
+</blockquote>
+
+<hr><h2>
+<a name="configuraci%C3%B3nimplementaci%C3%B3n" class="anchor" href="#configuraci%C3%B3nimplementaci%C3%B3n"><span class="octicon octicon-link"></span></a>Configuración/Implementación</h2>
+
+<p>Reemplazar en los scripts las referencias a:</p>
+
+<ul>
+<li>
+<code>DIR</code>: el directorio que queremos backupear</li>
+<li>
+<code>/path/to/dir</code>: la ruta al directorio que CONTIENE a <code>DIR</code>
+</li>
+<li>
+<code>/path/to/workspace</code>: la ruta a un directorio que usemos temporalmente para alojar los tar/snar</li>
+<li>
+<code>/backup</code>: un directorio donde se alojan los backups, probablemente un servidor de almacenamiento montado en un directorio local</li>
+<li>
+<code>DATE</code>: una variable que declaro para tener referencia de la fecha y usarla en los nombres de los archivos (no es necesario cambiarla)</li>
+</ul><p>Correr por primera vez el script <a href="https://github.com/CGastrell/incremental-tar-backup/blob/master/full-back-up.sh">full-backup.sh</a> a mano para inicializar los archivos incrementales y el snapshot.</p>
+
+<hr><h2>
+<a name="uso-t%C3%ADpico" class="anchor" href="#uso-t%C3%ADpico"><span class="octicon octicon-link"></span></a>Uso típico</h2>
+
+<p>Estos scripts sirven principalmente para guardar estados de un directorio de manera incremental.
+Dicho de otra manera, podemos armar estos scripts para que hagan backup de un sitio que tenemos
+publicado sin tener que copiar todos los archivos, solo los que hayan cambiado.
+Ejemplo de las variables de referencia:</p>
+
+<ul>
+<li>
+<code>DIR</code>: /var/www/misitio</li>
+<li>
+<code>/path/to/dir</code>: /var/www</li>
+<li>
+<code>/path/to/workspace</code>: /var/backups/sitioweb</li>
+<li>
+<code>/backup</code>: /mount/backupserverNFS</li>
+</ul><hr><h2>
+<a name="crontab" class="anchor" href="#crontab"><span class="octicon octicon-link"></span></a>Crontab</h2>
+
+<p>Para que estos scripts tengan sentido habrá que ponerlos en el <a href="https://en.wikipedia.org/wiki/Cron">cron</a>.</p>
+
+<p>Hay que estar atento que la cuenta que genere el crontab tenga permisos de lectura/escritura en los directorios
+correspondientes.</p>
+
+<p>Luego, el backup full no queremos correrlo muy seguido, en mi caso es cada 10 días a las 3AM (o, según dicen, cada vez que el
+día del mes es múltiplo de 10). Ej:</p>
+
+<pre>
+0 3 */10 * * /path/to/full-backup.sh
+</pre>
+
+<p>Y para que el incremental se corra todos los días a las 4AM:</p>
+
+<pre>
+0 4 * * * /path/to/incremental-backup.sh
+</pre>
+
+<p>Es importante que corras la primera vez el <a href="https://github.com/CGastrell/incremental-tar-backup/blob/master/full-back-up.sh">full-backup.sh</a> a mano (no esperes que lo haga el cron).</p>
+
+<hr><h2>
+<a name="incremental-simple-vs-incremental-por-niveles" class="anchor" href="#incremental-simple-vs-incremental-por-niveles"><span class="octicon octicon-link"></span></a>Incremental simple vs incremental por niveles</h2>
+
+<p>El incremental del <a href="http://kb.iu.edu/data/acfi.html">tar</a> se puede usar de 2 maneras:</p>
+
+<ul>
+<li>Creando incrementales directos sobre un full back up (simple)</li>
+<li>Creando niveles de incrementales (menos simple)</li>
+</ul><p>En el primer caso, se hace un incremental usando el parametro <code>--listed-incremental</code> y un archivo de
+snapshot (.snar) que se encarga de comparar y definir las diferencias para incluir en el incremental. Para restaurar
+<code>DIR</code> bastará con extraer el full backup y luego el de la fecha a restaurar.</p>
+
+<pre>
+tar -xzpf DIR-20130720-full.tar.gz
+tar -xzpf DIR-20130724-incremental.tar.gz
+</pre>
+
+<p>En el segundo, el incremental se hace siempre sobre otro incremental. Si bien esta forma da más control sobre
+el incremental y el tamaño de archivo, cuando se quiere restaurar <code>DIR</code> habrá que hacerlo secuencialmente
+como están hechos los incrementales. Ejemplo considerando que tenemos 4 incrementales:</p>
+
+<pre><code>tar -xzpf DIR-20130720-full.tar.gz
+tar -xzpf DIR-20130721-incremental.tar.gz
+tar -xzpf DIR-20130722-incremental.tar.gz
+tar -xzpf DIR-20130723-incremental.tar.gz
+tar -xzpf DIR-20130724-incremental.tar.gz
+</code></pre>
+      </section>
+      <footer>
+        <p>This project is maintained by <a href="https://github.com/CGastrell">CGastrell</a></p>
+        <p><small>Hosted on GitHub Pages &mdash; Theme by <a href="https://github.com/orderedlist">orderedlist</a></small></p>
+      </footer>
+    </div>
+    <script src="javascripts/scale.fix.js"></script>
+    
+  </body>
+</html>
